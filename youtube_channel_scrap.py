@@ -11,7 +11,7 @@ import json
 # NOTE: url gets to youtube are throttled to 3 seconds between requests
 # this is an ad hoc attempt to look like a human to youtube
 # so youtube does not start limiting access
-wait_between_requests = 3
+wait_between_requests = 5
 
 """ scrape youtube channel to build table of contents html file and 
     csv of video information for excel file
@@ -19,7 +19,7 @@ wait_between_requests = 3
 """
 
 # set youtube channel name here
-channel_name = 'gjenkinslbcc'
+channel_name = 'BobRossIncVideos'
 
 
 youtube_base = 'https://www.youtube.com/'
@@ -50,15 +50,16 @@ def channel_section_links(channel_name):
 
     global parent_folder
 
-    soup = get_soup(f'{youtube_base}/user/{channel_name}/playlists')
+    soup = get_soup(f'{youtube_base}/c/{channel_name}/playlists')
     if soup is None or 'This channel does not exist.' in soup.text:
-        url = f'{youtube_base}/channel/{channel_name}/playlists'
+        url = f'{youtube_base}/c/{channel_name}/playlists'
         soup = get_soup(url)
         if soup is None or 'This channel does not exist.' in soup.text:
             raise ValueError(
                 'The channel does not exists: ' + channel_name)
-        parent_folder = 'channel/'
-
+        parent_folder = 'c/'
+        """this is making a dictionary of all playlists with their subsequent
+        videos, I only care about 'The Joy of Painting - Full Seasons' playlists"""
     play_list_atags = \
         soup.find_all('a',
                       {'href': re.compile(f'{channel_name}/playlists')})
@@ -203,7 +204,7 @@ def link(text, url): # return a tag with content and link
     return f'<a href="{url}">{text}</a>'
 
 
-def html_out(channel, sections):
+"""def html_out(channel, sections):
     """create and write channel_name.html file"""
     title = f'YouTube Channel {channel}'
     f = open(f'{channel}.html','w')
@@ -229,7 +230,7 @@ def html_out(channel, sections):
                                      v['short_link']) + t))
                 parts.append('</ol>')
     f.write(template.format(channel, '\n'.join(parts)))
-    f.close()
+    f.close()"""
 
 
 def csv_out(channel, sections):
@@ -283,11 +284,11 @@ if __name__ == '__main__':
     with open(f'{channel_name}.json','w') as f:
         f.write(json.dumps(sections, sort_keys=True, indent=4))
 
-    html_out(channel_name, sections)  # create web page of channel links
+   """html_out(channel_name, sections)  # create web page of channel links"""
 
     # create a csv file of video info for import into spreadsheet
     csv_out(channel_name, sections)
 
-    print(f"Program Complete,\n  '{channel_name}.html' and"
-          f" '{channel_name}.csv' have been" 
+    print(f"Program Complete,\n"
+          f" '{channel_name}.csv' has been" 
           f" written to current directory")
